@@ -130,6 +130,20 @@ namespace SolrNet.Cloud
             Parent.Container.Register(cloudStateProvider.Key, container => cloudStateProvider);
         }
 
+        /// <summary>
+        /// Refresh state provider, in case the state provider needs to be reloaded
+        /// </summary>
+        public static async Task RefreshStateProvider(ISolrCloudStateProvider cloudStateProvider)
+        {
+            if (Providers.ContainsKey(cloudStateProvider.Key))
+            {
+                Parent.Container.Remove<ISolrCloudStateProvider>(cloudStateProvider.Key);
+                Providers.Remove(cloudStateProvider.Key);
+            }
+
+            await EnsureRegistrationAsync(cloudStateProvider);
+        }
+        
         private class OperationsProvider : ISolrOperationsProvider
         {
             public ISolrBasicOperations<T> GetBasicOperations<T>(string url, bool isPostConnection = false)
